@@ -1,15 +1,20 @@
 'use strict';
 
+import { default as Web3} from 'web3';
+import { default as contract } from 'truffle-contract'
 
+import AuditLog_artifacts from './../../build/contracts/AuditLog.json'
 
 module.exports.createLog = function(req, res){
 	let inputData = req.body;
-	var response = { success: true, receivedData: inputData };
+	
 
 	// TODO Call IPFS library, obtain hash
 	// TODO Call Ethereum to store the data
-	// >>>> How can we specify the ethereum account
 
+	console.log("Test");
+	// >>>> How can we specify the ethereum account
+	var response = { success: true, receivedData: inputData, test: "test" };
 	res.json(response);
 };
 
