@@ -47,6 +47,7 @@
     "npm": "^5.4.2",
     "style-loader": "^0.13.1",
     "truffle-contract": "^1.1.11",
-    "web3": "^0.18.2"
+    "web3": "^0.18.2",
+    "web3-provider-engine": "^13.2.8"
   }
 }
