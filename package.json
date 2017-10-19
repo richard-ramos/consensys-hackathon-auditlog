@@ -51,6 +51,7 @@
     "web3-provider-engine": "^13.2.8",
     "json-stable-stringify": "1.0.1",
     "ipfs-api": "14.3.7",
+    "ipfs": "0.26.0",
     "merkle-btree": "1.0.18"
   }
 }

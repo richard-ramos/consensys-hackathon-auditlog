@@ -1,7 +1,8 @@
 'use strict';
 
-import getWeb3 from '../utils/getWeb3' 
+import getWeb3 from '../utils/getWeb3'
 import AuditLogContract from '../../build/contracts/AuditLog'
+import auditLog from '../utils/auditLog'
 
 const contract = require('truffle-contract');
 const auditLogContract = contract(AuditLogContract);
@@ -12,6 +13,16 @@ module.exports.createLog = function(req, res){
 	var response = { success: true, receivedData: inputData };
 
 	// TODO Call IPFS library, obtain hash
+	auditLog.log
+	(
+		1,	// user id
+		2, 	// external id
+		{"testKey": "testValue"}	// json object
+	)
+		.then(ret_hash => {
+			console.log("ipfs_hash: " + ret_hash);
+		});
+
 	// TODO Call Ethereum to store the data
 	// >>>> How can we specify the ethereum account
 
@@ -22,10 +33,10 @@ module.exports.dataExists = function(req, res){
 
 	auditLogContract.setProvider(web3.currentProvider);
 
-	var response = { 
+	var response = {
 		eid: req.body.eid,
 		hash: "abcdefg",
-		exists: false 
+		exists: false
 	};
 
 	auditLogContract.deployed()
@@ -42,7 +53,7 @@ module.exports.dataExists = function(req, res){
 				});
 		})
 
-	auditLogContract.deployed().getFile(req.body.eid);	
+	auditLogContract.deployed().getFile(req.body.eid);
 
 
 	// getFile(bytes32 eid)
