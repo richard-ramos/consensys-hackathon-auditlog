@@ -1,5 +1,6 @@
 'use strict';
 
+import getWeb3 from '../utils/getWeb3' 
 
 
 module.exports.createLog = function(req, res){
@@ -20,7 +21,9 @@ module.exports.dataExists = function(req, res){
 		exists: false 
 	};
 
-	// TODO connect to ethereum, get info using eid, data, and userId
+	
+
+	// TODO connect to ethereum, get info using eid, data
 
 	res.json(response);
 }
