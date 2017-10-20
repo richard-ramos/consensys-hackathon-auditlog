@@ -13,8 +13,8 @@ contract AuditLog is Owned{
     
     event LogIPFSfile(address owner, bytes32 ipfsFile, bytes32 eid, bytes32 userId, uint version);
     
-    modifier isValidEid(bytes32 eid, bytes32 userId){ require(ipfsFiles[eidHash(eid, userId)].version > 0); _; }
-    modifier isEmptyEid(bytes32 eid, bytes32 userId){ require(ipfsFiles[eidHash(eid, userId)].version == 0); _; }
+    modifier isValidEid(bytes32 eid, bytes32 userId){require(ipfsFiles[eidHash(eid, userId)].version > 0); _;}
+    modifier isEmptyEid(bytes32 eid, bytes32 userId){require(ipfsFiles[eidHash(eid, userId)].version == 0); _;}
     
     function AuditLog()
         public
@@ -55,8 +55,10 @@ contract AuditLog is Owned{
     {
         bytes32 hash = eidHash(eid, userId);
 
+        require(ipfsFiles[hash].hashFile != ipfsFile);
+
         ipfsFiles[hash].hashFile = ipfsFile;
-        ipfsFiles[hash].version = 1;
+        ipfsFiles[hash].version += 1;
         
         LogIPFSfile(msg.sender, ipfsFile, eid, userId, 1);
         
@@ -64,23 +66,23 @@ contract AuditLog is Owned{
     }
     
     
-    function updateFile(bytes32 eid, bytes32 userId, bytes32 ipfsFile)
-        public
-        isValidEid(eid, userId)
-        fromOwner
-        returns(bool success)
-    {
-        bytes32 hash = eidHash(eid, userId);
+    // function updateFile(bytes32 eid, bytes32 userId, bytes32 ipfsFile)
+    //     public
+    //     isValidEid(eid, userId)
+    //     fromOwner
+    //     returns(bool success)
+    // {
+    //     bytes32 hash = eidHash(eid, userId);
 
-        require(ipfsFiles[hash].hashFile != ipfsFile);
+    //     require(ipfsFiles[hash].hashFile != ipfsFile);
         
-        ipfsFiles[hash].hashFile = ipfsFile;
-        ipfsFiles[hash].version += 1;
+    //     ipfsFiles[hash].hashFile = ipfsFile;
+    //     ipfsFiles[hash].version += 1;
         
-        LogIPFSfile(msg.sender, ipfsFile, eid, userId, ipfsFiles[hash].version);
+    //     LogIPFSfile(msg.sender, ipfsFile, eid, userId, ipfsFiles[hash].version);
         
-        return true;
-    }
+    //     return true;
+    // }
     
     
 }

@@ -4,8 +4,8 @@ import web3 from '../utils/getWeb3'
 import AuditLogContract from '../../build/contracts/AuditLog'
 //import auditLog from '../utils/auditLog'
 
-const contract = require('truffle-contract');
-const auditLogContract = contract(AuditLogContract);
+var contract = require('truffle-contract');
+var auditLogContract = contract(AuditLogContract);
 
 module.exports.createLog = function(req, res){
 	let inputData = req.body;
@@ -23,23 +23,32 @@ module.exports.createLog = function(req, res){
 		});
 */
 	// TODO Call Ethereum to store the data
-
-	console.log("Test");
+	
+	var account;
     web3.eth.getAccounts(function(err, accounts) {
 		if (err != null) {
 		  alert("There was an error fetching your accounts.");
 		  return;
 		}
-		console.log("Account: " + accounts[0])
+		console.log("Account: " + accounts[0]);
+		account = accounts[0];
 	})
 
 	var contract;
+
+	var eid = "test";
+	var userId = "USER";
+	var ipfsFile = "QmTNJbPFmcQtAy8ZGDUUqwLrxrbpApKuzTsRTgutHVkEys";
+
 	auditLogContract.setProvider(web3.currentProvider);
 	auditLogContract.deployed().then(function(instance) {
 		contract = instance;
-		
+		console.log("Contract", contract.address)
 
-
+		contract.addFile(eid, userId, ipfsFile, {from: account})
+		.then((result) => {
+			console.log(result)
+		})
 
 
 	}).catch(error => {
