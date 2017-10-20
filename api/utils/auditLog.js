@@ -1,6 +1,4 @@
 import web3 from '../utils/getWeb3'
-import AuditLogContract from '../../build/contracts/AuditLog'
-
 
 var ipfs = require('ipfs')
 var stringify = require('json-stable-stringify');
@@ -14,6 +12,9 @@ function AuditLog() {
     this.storage = new mBTree.IPFSStorage(this.ipfs);
     this.tree = new mBTree.MerkleBTree(this.storage);
     this.retrievalKey = this.getHash(new Date());
+
+console.log("RetrievalKey: " + this.retrievalKey);
+
     this.address_list = [];
 
     this.batchJob = this.batchJob.bind(this);
@@ -34,6 +35,7 @@ AuditLog.prototype.log = function(userId, externalId, jsonObject) {
                 prev_ipfs_address = value.ipfs_address;
             }
 
+console.log("RetrievalKey2: " + this.retrievalKey);
 
             let data = stringify(jsonObject);
             let dataHash = this.getHash(data);
@@ -85,8 +87,6 @@ AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
                 console.log("retrievalKey:" + value.retrievalKey);
                 var ipfsFile = Web3Wrapper.get(value.retrievalKey);
 
-
-
             } else {
                 console.log("Hash doesn't match!");
             }
@@ -105,23 +105,31 @@ AuditLog.prototype.getHash = function() {
 AuditLog.prototype.batchJob = function() {
     console.log("Batch job started");
 
-    
-    this.tree.put(this.retrievalKey, this.address_list)
-        .then( ipfs_address => {
+    if (this.address_list.length <= 0) {
+        console.log("array is empty! Skipping call to blockchain.")
+    } else {
+        this.ipfs.dag.put(
+            this.address_list,
+            { format: 'dag-cbor', hashAlg: 'sha2-256' },
+            (err, cid) =>
+            {
+                this.address_list = []; // reset
+                let ipfs_address = cid.toBaseEncodedString();
+                console.log(ipfs_address);
 
-            this.address_list = [];  // reset
+                let Web3Wrapper = require('../utils/web3-wrapper');
 
-            this.retrievalKey = this.getHash(new Date());
-            let Web3Wrapper = require('../utils/web3-wrapper');
+                var ipfsFilePromise = Web3Wrapper.insert(this.retrievalKey, ipfs_address);
 
-            var ipfsFilePromise = Web3Wrapper.insert(this.retrievalKey, ipfs_address);
-            
-            if(ipfsFilePromise != undefined)
-                ipfsFilePromise.then((result) => {
-                    const logEvent = result.logs[0];
-                    console.log("- IPFS Address: %s, Block: %s", logEvent.args.ipfsAddress, logEvent.args.blockNumber.toString(10));
-                });
-        });
+                if(ipfsFilePromise != undefined)
+                    ipfsFilePromise.then((result) => {
+                        const logEvent = result.logs[0];
+                        console.log({"ipfsAddress": logEvent.args.ipfsAddress, "blockNumber": logEvent.args.blockNumber});
+                    });
+
+                this.retrievalKey = this.getHash(new Date());
+            });
+    }
 
     return;
 }
