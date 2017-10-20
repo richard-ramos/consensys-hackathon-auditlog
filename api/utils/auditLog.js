@@ -6,6 +6,8 @@ var mBTree = require('merkle-btree');
 
 const ONE_MINUTE = 3 * 1000; //60 * 1000;
 
+var address_list = [];
+
 // Constructor
 function AuditLog() {
     this.ipfs = new ipfs();
@@ -13,9 +15,9 @@ function AuditLog() {
     this.tree = new mBTree.MerkleBTree(this.storage);
     this.retrievalKey = this.getHash(new Date());
 
-console.log("RetrievalKey: " + this.retrievalKey);
+    console.log("RetrievalKey: " + this.retrievalKey);
 
-    this.address_list = [];
+    address_list = [];
 
     this.batchJob = this.batchJob.bind(this);
 
@@ -35,8 +37,6 @@ AuditLog.prototype.log = function(userId, externalId, jsonObject) {
                 prev_ipfs_address = value.ipfs_address;
             }
 
-console.log("RetrievalKey2: " + this.retrievalKey);
-
             let data = stringify(jsonObject);
             let dataHash = this.getHash(data);
             let retrievalKey = this.retrievalKey;
@@ -51,8 +51,7 @@ console.log("RetrievalKey2: " + this.retrievalKey);
             let key = this.getHash(externalId, userId);
             this.tree.put(key, value)
                 .then( ipfs_address => {
-                    this.address_list.push(ipfs_address);
-
+                    address_list.push(ipfs_address);
                     let prev_value = {
                         'version': version + 1,
                         'ipfs_address': ipfs_address
@@ -71,7 +70,7 @@ AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
     var minimizedJson = stringify(jsonObject);
     var jsonHash = this.getHash(minimizedJson);
 
-    this.tree.get(key)
+    return this.tree.get(key)
         .then( value => {
             if (value == null) {
                 console.log("Log doesn't exist");
@@ -83,12 +82,20 @@ AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
             if (jsonHash == value.dataHash) {
                 console.log("Hash matches!");
 
-                // TODO: get from ethereum using retrievalKey
                 console.log("retrievalKey:" + value.retrievalKey);
-                var ipfsFile = Web3Wrapper.get(value.retrievalKey);
+
+                let Web3Wrapper = require('../utils/web3-wrapper');
+                var ipfsResult = Web3Wrapper.get(value.retrievalKey)
+                console.log(ipfsResult);
+                   
+                
+
+
+                return true;
 
             } else {
                 console.log("Hash doesn't match!");
+                return false;
             }
         })
 };
@@ -105,7 +112,7 @@ AuditLog.prototype.getHash = function() {
 AuditLog.prototype.batchJob = function() {
     console.log("Batch job started");
 
-    if (this.address_list.length <= 0) {
+    if (address_list.length <= 0) {
         console.log("array is empty! Skipping call to blockchain.")
     } else {
         this.ipfs.dag.put(
@@ -113,7 +120,7 @@ AuditLog.prototype.batchJob = function() {
             { format: 'dag-cbor', hashAlg: 'sha2-256' },
             (err, cid) =>
             {
-                this.address_list = []; // reset
+                address_list = []; // reset
                 let ipfs_address = cid.toBaseEncodedString();
                 console.log(ipfs_address);
 
@@ -134,5 +141,7 @@ AuditLog.prototype.batchJob = function() {
     return;
 }
 
+let auditLog = new AuditLog();
+
 // export the class
-module.exports = new AuditLog();
+module.exports = auditLog;

@@ -33,13 +33,13 @@ Web3Wrapper.prototype.insert = function(retKey, ipfsAddress) {
 
 Web3Wrapper.prototype.get = function(retKey){
     // returns ipfsAddress, blockNo
-    
-    auditLog.getIpfsAddress.call(retKey, {from: account})
-    .then((result) => {
-        console.log(result);
-        return ({"ipfsAddress": result.ipfsAddress, "blockNumber": result.blockNumber})
-    })
-    
+    if(auditLog != undefined)
+        auditLog.getIpfsAddress.call(retKey, {from: account})
+        .then((result) => {
+            return ({"ipfsAddress": result.ipfsAddress, "blockNumber": result.blockNumber})
+        })
+    else 
+        return {};
 }
 
 module.exports = new Web3Wrapper();

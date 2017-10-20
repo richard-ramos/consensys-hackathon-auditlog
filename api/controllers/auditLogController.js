@@ -31,22 +31,26 @@ module.exports.dataExists = function(req, res){
 			eid: req.body.eid,
 			userId: req.body.userId
 		},
-		object: {
-			hash: "",
-			version: 0,
-		},
-		exists: false,
-		valid: false,
 		error: false,
-		message: ""
+		matches: false
 	};
 
-	auditLog.audit
+	var x = auditLog.audit
 	(
 		req.body.userId,	// user id
 		req.body.eid, 		// external id
 		req.body.jsonObject	// json object
 	);
 
-	res.json(response);
+	x.then((result) => {
+		response.matches = result;
+		res.json(response);
+	}).catch((error) => {
+		console.log(error);
+		response.error = true;
+		res.json(response);
+	})
+
+
+	
 }
