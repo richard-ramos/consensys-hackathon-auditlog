@@ -4,7 +4,13 @@ import AuditLogContract from '../../build/contracts/AuditLog'
 var contract = require('truffle-contract');
 var auditLogContract = contract(AuditLogContract);
     auditLogContract.setProvider(web3.currentProvider);
-
+var auditLog;
+    auditLogContract.deployed().then(function(instance) {
+        auditLog = instance;
+        console.log("Contract", auditLog.address)
+    }).catch(error => {
+        console.log(error);
+    })
 
 var ipfs = require('ipfs')
 var stringify = require('json-stable-stringify');
@@ -86,6 +92,12 @@ AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
 
                 // TODO: get from ethereum using retrievalKey
                 console.log("retrievalKey:" + value.retrievalKey);
+                auditLog.getIpfsAddress(value.retrievalKey, {from: account})
+                .then((result) => {
+                    console.log(result)
+                })
+
+
             } else {
                 console.log("Hash doesn't match!");
             }
@@ -112,8 +124,12 @@ AuditLog.prototype.batchJob = function() {
 
             // TODO: call smart contract with
             // retKey, ipfs_address
-
             this.retrievalKey = this.getHash(new Date());
+            auditLog.addFile(retrievalKey, ipfs_address, {from: account})
+            .then((result) => {
+                console.log(result)
+            })
+
         });
 
     return;
