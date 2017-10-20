@@ -60,19 +60,34 @@ module.exports.createLog = function(req, res){
 	res.json(response);
 };
 
+
 module.exports.dataExists = function(req, res){
 
 	auditLogContract.setProvider(web3.currentProvider);
 
 	var response = {
-		eid: req.body.eid,
-		hash: "abcdefg",
-		exists: false
+		request: {
+			eid: req.body.eid,
+			userId: req.body.userId
+		},
+		object: {
+			hash: "",
+			version: 0,
+		},
+		exists: false,
+		valid: false,
+		error: false,
+		message: ""
 	};
 
 	web3.eth.getAccounts(function(err, accounts) {
 		if (err != null) {
 			alert("There was an error fetching your accounts.");
+			response.hash = result[0];
+			response.exists = false;
+		  	response.error = true;
+			response.message = "Error fetching accounts";
+			res.json(response);
 			return;
 		} else {
 			auditLogContract.deployed()
@@ -81,32 +96,35 @@ module.exports.dataExists = function(req, res){
 						.then((result) => {
 							if(result){
 								console.log("Success");
-								console.log(result);
+								response.object.hash = result[0];
+
+								// TODO: we need to compare the hash of the object 
+								//       to the hash stored on ipfs/blockchain, to 
+								//       determine if it is a valid object or if
+								//       it has changed
+
+								response.valid = "TBD";
+
+
+								response.object.version = parseInt(result[1].toString(10));
+								response.exists = parseInt(result[1].toString(10)) > 0; 
 							} else {
+								response.exists = false;
+								response.error = true;
+								response.message = result;
 								console.log("Fail");
 							}
+							res.json(response);
 					}).catch((err) => {
 						  console.log("Error");
+						  response.hash = result[0];
+						  response.exists = false;
+						  response.error = true;
+						  response.message = err;
+						  res.json(response);
 					});
 				})
 		}
 
-	})
-
-	
-
-
-
-
-
-
-
-
-	// getFile(bytes32 eid)
-
-
-
-	// TODO connect to ethereum, get info using eid, data
-
-	res.json(response);
+	});
 }

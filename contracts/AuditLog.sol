@@ -22,6 +22,7 @@ contract AuditLog is Owned{
         
     // }
     
+<<<<<<< HEAD
     // function getFile(bytes32 eid, bytes32 userId)
     //     public
     //     constant
@@ -37,6 +38,24 @@ contract AuditLog is Owned{
     // {
     //     return ipfsFiles[eidHash(eid, userId)].version;
     // }
+=======
+    function getFile(bytes32 eid, bytes32 userId)
+        public
+        constant
+        returns(bytes32 hashed, uint version)
+    {
+        return (ipfsFiles[eidHash(eid, userId)].hashFile, ipfsFiles[eidHash(eid, userId)].version);
+    }
+
+
+    function getCurrentVersion(bytes32 eid, bytes32 userId)
+        public
+        constant
+        returns(uint version)
+    {
+        return ipfsFiles[eidHash(eid, userId)].version;
+    }
+>>>>>>> 3d22503bf48b13aa8589212a27c13b2196edf617
 
     // function eidHash(bytes32 eid, bytes32 userId)
     //     public
