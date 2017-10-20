@@ -1,6 +1,8 @@
 import web3 from '../utils/getWeb3'
 import AuditLogContract from '../../build/contracts/AuditLog'
-import Web3Wrapper from '../utils/web3-wrapper'
+
+
+
 
 var contract = require('truffle-contract');
 var auditLogContract = contract(AuditLogContract);
@@ -25,6 +27,9 @@ function AuditLog() {
     this.storage = new mBTree.IPFSStorage(this.ipfs);
     this.tree = new mBTree.MerkleBTree(this.storage);
     this.retrievalKey = this.getHash(new Date());
+
+console.log("RetrievalKey: " + this.retrievalKey);
+
     this.address_list = [];
 
     this.batchJob = this.batchJob.bind(this);
@@ -44,6 +49,8 @@ AuditLog.prototype.log = function(userId, externalId, jsonObject) {
                 version = value.version;
                 prev_ipfs_address = value.ipfs_address;
             }
+
+console.log("RetrievalKey2: " + this.retrievalKey);
 
             let data = stringify(jsonObject);
             let dataHash = this.getHash(data);
@@ -115,16 +122,19 @@ AuditLog.prototype.getHash = function() {
 AuditLog.prototype.batchJob = function() {
     console.log("Batch job started");
 
+    
     this.tree.put(this.retrievalKey, this.address_list)
         .then( ipfs_address => {
 
             this.address_list = [];  // reset
 
-
-            // TODO: call smart contract with
-            // retKey, ipfs_address
             this.retrievalKey = this.getHash(new Date());
-            var ipfsFile = Web3Wrapper.insert(retrievalKey, ipfs_address);
+            let Web3Wrapper = require('../utils/web3-wrapper');
+
+            var ipfsFile = Web3Wrapper.insert(this.retrievalKey, ipfs_address);
+            
+            console.log("Inserted - " + ipfsFile);
+
         });
 
     return;

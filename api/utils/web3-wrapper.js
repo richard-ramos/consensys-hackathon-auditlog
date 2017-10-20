@@ -17,18 +17,21 @@ var account;
     })
 
 function Web3Wrapper() {
-
+    console.log("Initializing Web3Wrapper");
 }
 
 // class methods
 Web3Wrapper.prototype.insert = function(retKey, ipfsAddress) {
 
-    auditLog.addFile(retKey, ipfsAddress, {from: account})
-    .then((result) => {
-        console.log(result);
-        const logEvent = txn.logs[0];
-        return ({"ipfsAddress": logEvent.ipfsAddress, "blockNumber": logEvent.blockNumber})
-    })
+    if(auditLog != undefined){
+        auditLog.addFile(retKey, ipfsAddress, {from: account})
+            .then((result) => {
+                console.log(result);
+                const logEvent = result.logs[0];
+                return ({"ipfsAddress": logEvent.ipfsAddress, "blockNumber": logEvent.blockNumber})
+            })
+    }
+    
 
 };
    
@@ -44,4 +47,4 @@ Web3Wrapper.prototype.get = function(retKey){
     
 }
 
-
+module.exports = new Web3Wrapper();

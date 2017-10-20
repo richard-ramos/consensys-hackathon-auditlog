@@ -37,7 +37,7 @@ contract AuditLog is Owned{
     //     returns(uint version)
     // {
     //     return ipfsFiles[eidHash(eid, userId)].version;
-    }
+    //}
 
     // function eidHash(bytes32 eid, bytes32 userId)
     //     public

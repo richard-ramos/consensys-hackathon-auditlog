@@ -90,6 +90,8 @@ module.exports.dataExists = function(req, res){
 			res.json(response);
 			return;
 		} else {
+
+			
 			auditLogContract.deployed()
 				.then((instance) => {
 					instance.getFile.call(req.body.eid)
