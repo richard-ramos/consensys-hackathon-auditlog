@@ -25,10 +25,11 @@ contract AuditLog is Owned{
     function getFile(bytes32 eid, bytes32 userId)
         public
         constant
-        returns(bytes32 hashed)
+        returns(bytes32 hashed, uint version)
     {
-        return ipfsFiles[eidHash(eid, userId)].hashFile;
+        return (ipfsFiles[eidHash(eid, userId)].hashFile, ipfsFiles[eidHash(eid, userId)].version);
     }
+
 
     function getCurrentVersion(bytes32 eid, bytes32 userId)
         public
