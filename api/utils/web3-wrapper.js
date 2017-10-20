@@ -24,12 +24,7 @@ function Web3Wrapper() {
 Web3Wrapper.prototype.insert = function(retKey, ipfsAddress) {
 
     if(auditLog != undefined){
-        auditLog.addFile(retKey, ipfsAddress, {from: account})
-            .then((result) => {
-                console.log(result);
-                const logEvent = result.logs[0];
-                return ({"ipfsAddress": logEvent.ipfsAddress, "blockNumber": logEvent.blockNumber})
-            })
+        return auditLog.addFile(retKey, ipfsAddress, {from: account})
     }
     
 

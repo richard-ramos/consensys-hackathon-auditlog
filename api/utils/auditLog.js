@@ -131,10 +131,13 @@ AuditLog.prototype.batchJob = function() {
             this.retrievalKey = this.getHash(new Date());
             let Web3Wrapper = require('../utils/web3-wrapper');
 
-            var ipfsFile = Web3Wrapper.insert(this.retrievalKey, ipfs_address);
+            var ipfsFilePromise = Web3Wrapper.insert(this.retrievalKey, ipfs_address);
             
-            console.log("Inserted - " + ipfsFile);
-
+            if(ipfsFilePromise != undefined)
+                ipfsFilePromise.then((result) => {
+                    const logEvent = result.logs[0];
+                    console.log({"ipfsAddress": logEvent.args.ipfsAddress, "blockNumber": logEvent.args.blockNumber});
+                });
         });
 
     return;
