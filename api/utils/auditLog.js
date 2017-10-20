@@ -1,5 +1,6 @@
 import web3 from '../utils/getWeb3'
 import AuditLogContract from '../../build/contracts/AuditLog'
+import Web3Wrapper from '../utils/web3-wrapper'
 
 var contract = require('truffle-contract');
 var auditLogContract = contract(AuditLogContract);
@@ -92,10 +93,8 @@ AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
 
                 // TODO: get from ethereum using retrievalKey
                 console.log("retrievalKey:" + value.retrievalKey);
-                auditLog.getIpfsAddress(value.retrievalKey, {from: account})
-                .then((result) => {
-                    console.log(result)
-                })
+                var ipfsFile = Web3Wrapper.get(value.retrievalKey);
+
 
 
             } else {
@@ -125,11 +124,7 @@ AuditLog.prototype.batchJob = function() {
             // TODO: call smart contract with
             // retKey, ipfs_address
             this.retrievalKey = this.getHash(new Date());
-            auditLog.addFile(retrievalKey, ipfs_address, {from: account})
-            .then((result) => {
-                console.log(result)
-            })
-
+            var ipfsFile = Web3Wrapper.insert(retrievalKey, ipfs_address);
         });
 
     return;
