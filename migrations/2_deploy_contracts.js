@@ -1,5 +1,5 @@
-var auditLogContract = artifacts.require("./AuditLog.sol");
+var AuditLogContract = artifacts.require("./AuditLog.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(auditLogContract);
+  deployer.deploy(AuditLogContract);
 };

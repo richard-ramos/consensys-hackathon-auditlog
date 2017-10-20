@@ -2,29 +2,28 @@
 
 import web3 from '../utils/getWeb3' 
 import AuditLogContract from '../../build/contracts/AuditLog'
-import auditLog from '../utils/auditLog'
+// import auditLog from '../utils/auditLog'
 
-const contract = require('truffle-contract');
-const auditLogContract = contract(AuditLogContract);
+var contract = require('truffle-contract');
+var auditLogContract = contract(AuditLogContract);
 
 module.exports.createLog = function(req, res){
 	let inputData = req.body;
 	
 
 	// TODO Call IPFS library, obtain hash
-	auditLog.log
-	(
-		1,	// user id
-		2, 	// external id
-		{"testKey": "testValue"}	// json object
-	)
-		.then(ret_hash => {
-			console.log("ipfs_hash: " + ret_hash);
-		});
+	// auditLog.log
+	// (
+	// 	1,	// user id
+	// 	2, 	// external id
+	// 	{"testKey": "testValue"}	// json object
+	// )
+	// 	.then(ret_hash => {
+	// 		console.log("ipfs_hash: " + ret_hash);
+	// 	});
 
 	// TODO Call Ethereum to store the data
 
-	console.log("Test");
     web3.eth.getAccounts(function(err, accounts) {
 		if (err != null) {
 		  alert("There was an error fetching your accounts.");
@@ -34,9 +33,11 @@ module.exports.createLog = function(req, res){
 	})
 
 	var contract;
-	auditLogContract.deployed().then(function(instance) {
+	auditLogContract.setProvider(web3.currentProvider);
+
+	auditLogContract.deployed(function(instance) {
 		contract = instance;
-		console.log(contract)
+		console.log(instance)
 	})
 
 	// >>>> How can we specify the ethereum account
