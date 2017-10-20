@@ -23,20 +23,34 @@ module.exports.createLog = function(req, res){
 		});
 */
 	// TODO Call Ethereum to store the data
-
+	
+	var account;
     web3.eth.getAccounts(function(err, accounts) {
 		if (err != null) {
 		  alert("There was an error fetching your accounts.");
 		  return;
 		}
-		console.log("Account: " + accounts[0])
+		console.log("Account: " + accounts[0]);
+		account = accounts[0];
 	})
 
 	var contract;
+
+	var eid = "test";
+	var userId = "USER";
+	var ipfsFile = "QmTNJbPFmcQtAy8ZGDUUqwLrxrbpApKuzTsRTgutHVkEys";
+
 	auditLogContract.setProvider(web3.currentProvider);
 	auditLogContract.deployed().then(function(instance) {
 		contract = instance;
-		console.log("Contract" + contract)
+		console.log("Contract", contract.address)
+
+		contract.addFile(eid, userId, ipfsFile, {from: account})
+		.then((result) => {
+			console.log(result)
+		})
+
+
 	}).catch(error => {
 		console.log(error);
 	})
@@ -56,21 +70,36 @@ module.exports.dataExists = function(req, res){
 		exists: false
 	};
 
-	auditLogContract.deployed()
-		.then((instance) => {
-			instance.getFile.call(req.body.eid)
-				.then((result) => {
-					if(result){
-						console.log("Success");
-					} else {
-						console.log("Fail");
-					}
-				}).catch((err) => {
-					  console.log("Error");
-				});
-		})
+	web3.eth.getAccounts(function(err, accounts) {
+		if (err != null) {
+			alert("There was an error fetching your accounts.");
+			return;
+		} else {
+			auditLogContract.deployed()
+				.then((instance) => {
+					instance.getFile.call(req.body.eid)
+						.then((result) => {
+							if(result){
+								console.log("Success");
+								console.log(result);
+							} else {
+								console.log("Fail");
+							}
+					}).catch((err) => {
+						  console.log("Error");
+					});
+				})
+		}
 
-	auditLogContract.deployed().getFile(req.body.eid);
+	})
+
+	
+
+
+
+
+
+
 
 
 	// getFile(bytes32 eid)
