@@ -1,10 +1,16 @@
 import web3 from '../utils/getWeb3'
+import AuditLogContract from '../../build/contracts/AuditLog'
+
+var contract = require('truffle-contract');
+var auditLogContract = contract(AuditLogContract);
+    auditLogContract.setProvider(web3.currentProvider);
+
 
 var ipfs = require('ipfs')
 var stringify = require('json-stable-stringify');
 var mBTree = require('merkle-btree');
 
-const ONE_MINUTE = 10 * 1000; //60 * 1000;
+const ONE_MINUTE = 3 * 1000; //60 * 1000;
 
 // Constructor
 function AuditLog() {
@@ -13,6 +19,8 @@ function AuditLog() {
     this.tree = new mBTree.MerkleBTree(this.storage);
     this.retrievalKey = this.getHash(new Date());
     this.address_list = [];
+
+    this.batchJob = this.batchJob.bind(this);
 
     setInterval(this.batchJob, ONE_MINUTE);
 }
@@ -94,12 +102,14 @@ AuditLog.prototype.getHash = function() {
 }
 
 AuditLog.prototype.batchJob = function() {
-    console.log("batch job started!");
+    console.log("Batch job started");
 
-    this.tree.put(this.retrievalKey, address_list)
+    this.tree.put(this.retrievalKey, this.address_list)
         .then( ipfs_address => {
 
-            address_list = [];  // reset
+            this.address_list = [];  // reset
+
+
             // TODO: call smart contract with
             // retKey, ipfs_address
 
