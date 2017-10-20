@@ -11,10 +11,10 @@ contract AuditLog is Owned{
     // String? Bytes?
     mapping(bytes32 => ipfsInfo) public ipfsFiles;
     
-    event LogIPFSfile(address owner, bytes32 ipfsFile, bytes32 eid, uint version);
+    event LogIPFSfile(address owner, bytes32 ipfsFile, bytes32 eid, bytes32 userId, uint version);
     
-    modifier isValidEid(bytes32 eid){ require(ipfsFiles[eidHash(eid)].version > 0); _; }
-    modifier isEmptyEid(bytes32 eid){ require(ipfsFiles[eidHash(eid)].version == 0); _; }
+    modifier isValidEid(bytes32 eid, bytes32 userId){ require(ipfsFiles[eidHash(eid, userId)].version > 0); _; }
+    modifier isEmptyEid(bytes32 eid, bytes32 userId){ require(ipfsFiles[eidHash(eid, userId)].version == 0); _; }
     
     function AuditLog()
         public
@@ -22,57 +22,61 @@ contract AuditLog is Owned{
         
     }
     
-    function getFile(bytes32 eid)
+    function getFile(bytes32 eid, bytes32 userId)
         public
         constant
         returns(bytes32 hashed)
     {
-        return ipfsFiles[eidHash(eid)].hashFile;
+        return ipfsFiles[eidHash(eid, userId)].hashFile;
     }
 
-    function getCurrentVersion(bytes32 eid)
+    function getCurrentVersion(bytes32 eid, bytes32 userId)
         public
         constant
         returns(uint version)
     {
-        return ipfsFiles[eidHash(eid)].version;
+        return ipfsFiles[eidHash(eid, userId)].version;
     }
 
-    function eidHash(bytes32 eid)
+    function eidHash(bytes32 eid, bytes32 userId)
         public
         constant
         returns(bytes32 hashed)
     {
-        return keccak256(eid);
+        return keccak256(eid, userId);
     }
     
-    function addFile(bytes32 eid, bytes32 ipfsFile)
+    function addFile(bytes32 eid, bytes32 userId, bytes32 ipfsFile)
         public
-        isEmptyEid(eid)
+        isEmptyEid(eid, userId)
         fromOwner
         returns(bool success)
     {
-        ipfsFiles[eidHash(eid)].hashFile = ipfsFile;
-        ipfsFiles[eidHash(eid)].version = 1;
+        bytes32 hash = eidHash(eid, userId);
+
+        ipfsFiles[hash].hashFile = ipfsFile;
+        ipfsFiles[hash].version = 1;
         
-        LogIPFSfile(msg.sender, ipfsFile, eid, 1);
+        LogIPFSfile(msg.sender, ipfsFile, eid, userId, 1);
         
         return true;
     }
     
     
-    function updateFile(bytes32 eid, bytes32 ipfsFile)
+    function updateFile(bytes32 eid, bytes32 userId, bytes32 ipfsFile)
         public
-        isValidEid(eid)
+        isValidEid(eid, userId)
         fromOwner
         returns(bool success)
     {
-        require(ipfsFiles[eidHash(eid)].hashFile != ipfsFile);
+        bytes32 hash = eidHash(eid, userId);
+
+        require(ipfsFiles[hash].hashFile != ipfsFile);
         
-        ipfsFiles[eidHash(eid)].hashFile = ipfsFile;
-        ipfsFiles[eidHash(eid)].version += 1;
+        ipfsFiles[hash].hashFile = ipfsFile;
+        ipfsFiles[hash].version += 1;
         
-        LogIPFSfile(msg.sender, ipfsFile, eid, ipfsFiles[eidHash(eid)].version);
+        LogIPFSfile(msg.sender, ipfsFile, eid, userId, ipfsFiles[hash].version);
         
         return true;
     }

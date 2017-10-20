@@ -35,9 +35,13 @@ module.exports.createLog = function(req, res){
 
 	var contract;
 	auditLogContract.setProvider(web3.currentProvider);
-	auditLogContract.at("0x4a0f7cfd3d9d64c3ecffff4b7ac1f45690eaafff").then(function(instance) {
+	auditLogContract.deployed().then(function(instance) {
 		contract = instance;
-		console.log("Contract" + contract)
+		
+
+
+
+
 	}).catch(error => {
 		console.log(error);
 	})
@@ -57,21 +61,36 @@ module.exports.dataExists = function(req, res){
 		exists: false
 	};
 
-	auditLogContract.deployed()
-		.then((instance) => {
-			instance.getFile.call(req.body.eid)
-				.then((result) => {
-					if(result){
-						console.log("Success");
-					} else {
-						console.log("Fail");
-					}
-				}).catch((err) => {
-					  console.log("Error");
-				});
-		})
+	web3.eth.getAccounts(function(err, accounts) {
+		if (err != null) {
+			alert("There was an error fetching your accounts.");
+			return;
+		} else {
+			auditLogContract.deployed()
+				.then((instance) => {
+					instance.getFile.call(req.body.eid)
+						.then((result) => {
+							if(result){
+								console.log("Success");
+								console.log(result);
+							} else {
+								console.log("Fail");
+							}
+					}).catch((err) => {
+						  console.log("Error");
+					});
+				})
+		}
 
-	auditLogContract.deployed().getFile(req.body.eid);
+	})
+
+	
+
+
+
+
+
+
 
 
 	// getFile(bytes32 eid)
