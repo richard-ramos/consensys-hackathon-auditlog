@@ -1,0 +1,91 @@
+swagger: '2.0'
+info:
+  description: >-
+    This project is a plugin to systems (API) that need to hold user accountable
+    when there is a need for an audit. The idea is to develop a core structure
+    to be connected to other products as a log-like solution, where we can know
+    for sure what was the state of the logged data (any data) since the system
+    hashes it and stores it onto the blockchain.
+  version: 0.0.1
+  title: Audit Log System
+host: 'localhost:3000'
+basePath: /
+schemes:
+  - http
+paths:
+  /api/log:
+    post:
+      summary: Log Data
+      description: ''
+      operationId: log
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Object that will contain the external Id, user Id and data to be
+            stored
+          required: true
+          schema:
+            $ref: '#/definitions/Log'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: object
+            $ref: '#/definitions/LogResponse'
+  /api/audit:
+    post:
+      summary: Check if data exists and hasn't been tampered
+      description: ''
+      operationId: audit
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Object that will contain the external Id, user Id and data to be
+            stored
+          required: true
+          schema:
+            $ref: '#/definitions/Log'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: object
+            $ref: '#/definitions/AuditResponse'
+definitions:
+  Log:
+    type: object
+    required:
+      - eid
+      - userid
+      - jsonObject
+    properties:
+      eid:
+        type: string
+      userid:
+        type: string
+      jsonObject:
+        type: object
+  LogResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      receivedData:
+        $ref: '#/definitions/Log'
+  AuditResponse:
+    type: object
+    properties:
+      error:
+        type: boolean
+      matches:
+        type: boolean
