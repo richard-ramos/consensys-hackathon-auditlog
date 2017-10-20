@@ -89,9 +89,14 @@ module.exports.dataExists = function(req, res){
 								console.log("Success");
 								response.object.hash = result[0];
 
-								// TODO: we need to compare the hash of the object to the hash stored on ipfs/blockchain, to determine if state changed
+								// TODO: we need to compare the hash of the object 
+								//       to the hash stored on ipfs/blockchain, to 
+								//       determine if it is a valid object or if
+								//       it has changed
 
 								response.valid = "TBD";
+
+
 								response.object.version = parseInt(result[1].toString(10));
 								response.exists = parseInt(result[1].toString(10)) > 0; 
 							} else {
@@ -112,22 +117,5 @@ module.exports.dataExists = function(req, res){
 				})
 		}
 
-	})
-
-	
-
-
-
-
-
-
-
-
-	// getFile(bytes32 eid)
-
-
-
-	// TODO connect to ethereum, get info using eid, data
-
-	
+	});
 }
