@@ -17,7 +17,7 @@ module.exports.createLog = function(req, res){
 		req.body.jsonObject	// json object
 	);
 
-	var response = { success: true, receivedData: inputData, test: "test" };
+	var response = { success: true, receivedData: inputData};
 	res.json(response);
 };
 

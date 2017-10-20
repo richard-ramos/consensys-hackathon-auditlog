@@ -12,4 +12,4 @@ routes(app);
 
 app.listen(port);
 
-console.log('AuditLog API started on: ' + port);
+console.log( 'AuditLog API started on: ' + port);

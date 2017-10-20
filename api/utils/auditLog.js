@@ -70,34 +70,58 @@ AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
     var minimizedJson = stringify(jsonObject);
     var jsonHash = this.getHash(minimizedJson);
 
+    let logValue, outcomeObj;
+
     return this.tree.get(key)
         .then( value => {
+            logValue = value;
             if (value == null) {
                 console.log("Log doesn't exist");
-                return;
+                return { outcome: false };
             }
 
-            console.log("values: " + stringify(value));
             // Compare by hash of the data
             if (jsonHash == value.dataHash) {
-                console.log("Hash matches!");
-
-                console.log("retrievalKey:" + value.retrievalKey);
-
-                let Web3Wrapper = require('../utils/web3-wrapper');
-                var ipfsResult = Web3Wrapper.get(value.retrievalKey)
-                console.log(ipfsResult);
-                   
-                
-
-
-                return true;
+                console.log("Hash matches");
+                return { outcome: true, log: value };
 
             } else {
-                console.log("Hash doesn't match!");
-                return false;
+                console.log("Hash doesn't match");
+                return { outcome: false };
             }
         })
+        .then( (outcome) => {
+            outcomeObj = outcome;
+            let Web3Wrapper = require('../utils/web3-wrapper');
+            if(outcomeObj.outcome)
+                return Web3Wrapper.get(outcome.log.retrievalKey)
+            else
+                return new Promise((resolve) => { resolve({}); });
+        })
+        .then((result) => {
+            let finalResponse = false; 
+            if(outcomeObj.outcome){
+                if(parseInt(result[1].toString(10)) > 0)
+                    finalResponse = true;
+                else 
+                    finalResponse = false;
+
+                console.log("Block: %s", result[1].toString(10));
+            } else
+                finalResponse = false;
+
+
+            if(finalResponse)
+                console.log('\x1b[32m');
+            else
+                console.log("\x1b[31m");
+
+            console.log("Outcome: %s", finalResponse);
+
+            console.log("\x1b[37m");
+
+            return finalResponse;
+        });
 };
 
 AuditLog.prototype.getHash = function() {
@@ -113,7 +137,7 @@ AuditLog.prototype.batchJob = function() {
     console.log("Batch job started");
 
     if (address_list.length <= 0) {
-        console.log("array is empty! Skipping call to blockchain.")
+        console.log("Address list is empty. Skipping blockchain call")
     } else {
         this.ipfs.dag.put(
             this.address_list,
@@ -126,12 +150,10 @@ AuditLog.prototype.batchJob = function() {
 
                 let Web3Wrapper = require('../utils/web3-wrapper');
 
-                var ipfsFilePromise = Web3Wrapper.insert(this.retrievalKey, ipfs_address);
-
-                if(ipfsFilePromise != undefined)
-                    ipfsFilePromise.then((result) => {
+                Web3Wrapper.insert(this.retrievalKey, ipfs_address)
+                    .then((result) => {
                         const logEvent = result.logs[0];
-                        console.log({"ipfsAddress": logEvent.args.ipfsAddress, "blockNumber": logEvent.args.blockNumber});
+                        console.log( "IPFS address: %s, Block: %s", logEvent.args.ipfsAddress, logEvent.args.blockNumber);
                     });
 
                 this.retrievalKey = this.getHash(new Date());
