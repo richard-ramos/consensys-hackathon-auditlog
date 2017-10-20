@@ -2,7 +2,7 @@
 
 import web3 from '../utils/getWeb3' 
 import AuditLogContract from '../../build/contracts/AuditLog'
-// import auditLog from '../utils/auditLog'
+//import auditLog from '../utils/auditLog'
 
 var contract = require('truffle-contract');
 var auditLogContract = contract(AuditLogContract);
@@ -12,16 +12,16 @@ module.exports.createLog = function(req, res){
 	
 
 	// TODO Call IPFS library, obtain hash
-	// auditLog.log
-	// (
-	// 	1,	// user id
-	// 	2, 	// external id
-	// 	{"testKey": "testValue"}	// json object
-	// )
-	// 	.then(ret_hash => {
-	// 		console.log("ipfs_hash: " + ret_hash);
-	// 	});
-
+/*	auditLog.log
+	(
+		1,	// user id
+		2, 	// external id
+		{"testKey": "testValue"}	// json object
+	)
+		.then(ret_hash => {
+			console.log("ipfs_hash: " + ret_hash);
+		});
+*/
 	// TODO Call Ethereum to store the data
 
     web3.eth.getAccounts(function(err, accounts) {
@@ -29,15 +29,16 @@ module.exports.createLog = function(req, res){
 		  alert("There was an error fetching your accounts.");
 		  return;
 		}
-		console.log(accounts[0])
+		console.log("Account: " + accounts[0])
 	})
 
 	var contract;
 	auditLogContract.setProvider(web3.currentProvider);
-
-	auditLogContract.deployed(function(instance) {
+	auditLogContract.deployed().then(function(instance) {
 		contract = instance;
-		console.log(instance)
+		console.log("Contract" + contract)
+	}).catch(error => {
+		console.log(error);
 	})
 
 	// >>>> How can we specify the ethereum account
