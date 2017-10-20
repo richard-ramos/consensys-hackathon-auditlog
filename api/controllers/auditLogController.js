@@ -2,7 +2,7 @@
 
 import web3 from '../utils/getWeb3' 
 import AuditLogContract from '../../build/contracts/AuditLog'
-//import auditLog from '../utils/auditLog'
+import auditLog from '../utils/auditLog'
 
 var contract = require('truffle-contract');
 var auditLogContract = contract(AuditLogContract);

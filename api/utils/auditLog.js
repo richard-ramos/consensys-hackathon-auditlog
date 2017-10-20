@@ -95,7 +95,7 @@ AuditLog.prototype.getHash = function() {
 
 AuditLog.prototype.batchJob = function() {
     console.log("batch job started!");
-    /*
+
     this.tree.put(this.retrievalKey, address_list)
         .then( ipfs_address => {
 
@@ -105,7 +105,7 @@ AuditLog.prototype.batchJob = function() {
 
             this.retrievalKey = this.getHash(new Date());
         });
-*/
+
     return;
 }
 
