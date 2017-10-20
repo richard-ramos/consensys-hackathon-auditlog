@@ -2,19 +2,6 @@ import web3 from '../utils/getWeb3'
 import AuditLogContract from '../../build/contracts/AuditLog'
 
 
-
-
-var contract = require('truffle-contract');
-var auditLogContract = contract(AuditLogContract);
-    auditLogContract.setProvider(web3.currentProvider);
-var auditLog;
-    auditLogContract.deployed().then(function(instance) {
-        auditLog = instance;
-        console.log("Contract", auditLog.address)
-    }).catch(error => {
-        console.log(error);
-    })
-
 var ipfs = require('ipfs')
 var stringify = require('json-stable-stringify');
 var mBTree = require('merkle-btree');
@@ -27,9 +14,6 @@ function AuditLog() {
     this.storage = new mBTree.IPFSStorage(this.ipfs);
     this.tree = new mBTree.MerkleBTree(this.storage);
     this.retrievalKey = this.getHash(new Date());
-
-console.log("RetrievalKey: " + this.retrievalKey);
-
     this.address_list = [];
 
     this.batchJob = this.batchJob.bind(this);
@@ -50,7 +34,6 @@ AuditLog.prototype.log = function(userId, externalId, jsonObject) {
                 prev_ipfs_address = value.ipfs_address;
             }
 
-console.log("RetrievalKey2: " + this.retrievalKey);
 
             let data = stringify(jsonObject);
             let dataHash = this.getHash(data);
@@ -136,7 +119,7 @@ AuditLog.prototype.batchJob = function() {
             if(ipfsFilePromise != undefined)
                 ipfsFilePromise.then((result) => {
                     const logEvent = result.logs[0];
-                    console.log({"ipfsAddress": logEvent.args.ipfsAddress, "blockNumber": logEvent.args.blockNumber});
+                    console.log("- IPFS Address: %s, Block: %s", logEvent.args.ipfsAddress, logEvent.args.blockNumber.toString(10));
                 });
         });
 
