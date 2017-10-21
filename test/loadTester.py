@@ -1,7 +1,7 @@
 from Queue import Queue
 import logging
 from threading import Thread
-import random, time
+import random, time, json
 
 import argparse
 
@@ -78,13 +78,14 @@ import requests
 parallel = Parallel(4)
 
 #url = 'http://c1.staticflickr.com/4/3939/15717056471_e25211f4d1_b.jpg'
+baseurl = 'http://localhost:3000'
 url = 'http://localhost:3000/api/log'
 
 
 
 parser = argparse.ArgumentParser(description = 'Process display arguments')
 parser.add_argument('--rps', nargs = '?', default = '3')
-parser.add_argument('--secs', nargs = '?', default = '9')
+parser.add_argument('--secs', nargs = '?', default = '5')
 args = parser.parse_args()
 
 
@@ -94,6 +95,9 @@ requestsPerSecond = int(args.rps)
 secs = int(args.secs)
 total = secs * requestsPerSecond
 
+log = []
+logf  = open('demolog.txt','w')
+
 # launch jobs
 for i in range(total/requestsPerSecond):
 
@@ -101,21 +105,53 @@ for i in range(total/requestsPerSecond):
 
         print 'adding task %d...' % i
 
-        object = { "price" : str(200.0 + random.random()*100) }
+        obj = { "price" : str(200.0 + random.random()*100) }
         uid = random.randint(0,users-1)
         eid = random.randint(0,objects-1)
 
         data = {
-                "userId": str(uid),
+                "uid": str(uid),
                 "eid": str(eid),
-                "jsonObject": object
+                "jsonObject": obj
             }
 
+        url = baseurl + '/api/log'
         print 'requesting POST ' + url + ' ' + str(data)
 
         parallel.add_task(i, requests.post, url, data = {'key':'value'})
 
+        log.append( (uid,eid,obj) )
+        logf.write('%s,%s,%s\n' % (str(uid),str(eid),json.dumps(obj)))
         time.sleep( 1.0 / requestsPerSecond )
 
     # wait for all jobs to return data
     print parallel.get_results()
+
+# launch jobs
+count = 0
+for uid,eid,obj in log:
+
+    print 'adding task %d...' % i
+
+    data = {
+            "uid": str(uid),
+            "eid": str(eid),
+            "jsonObject": obj
+        }
+
+    url = baseurl + '/api/audit'
+    print 'requesting POST ' + url + ' ' + str(data)
+
+    parallel.add_task(i, requests.post, url, data = {'key':'value'})
+
+    log.append( (uid,eid,obj) )
+    logf.write('%s,%s,%s\n' % (str(uid),str(eid),json.dumps(obj)))
+    
+    time.sleep( 1.0 / requestsPerSecond )
+
+    count += 1
+    if count % requestsPerSecond == 0: 
+	    # wait for all jobs to return data
+   		print parallel.get_results()
+
+
