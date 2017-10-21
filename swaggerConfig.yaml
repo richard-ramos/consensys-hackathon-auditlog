@@ -82,8 +82,14 @@ definitions:
   AuditResponse:
     type: "object"
     properties:
-      error:
-        type: "boolean"
+      request:
+        $ref: "#/definitions/Log"
       matches:
         type: "boolean"
+      matchVersion:
+        type: "integer"
+      matchesWithLastVersion:
+        type: "boolean"
+      blockNo:
+        type: "integer"
   
