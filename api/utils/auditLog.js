@@ -84,19 +84,46 @@ AuditLog.prototype.audit = async function(userId, externalId, jsonObject) {
             let data_ = await readFromIpfs(prevAddress);
             let dataJson_ = JSON.parse(data_);
             let version_ = dataJson_['version'];
-            prevAddress = dataJson_['prev'];
 
             if (dataJson_['dataHash'] == jsonHash) {
                 console.log("Hash matches with version:" + version_ + " lastVersion=" + lastVersion);
                 isHashMatch = true;
-                finalResponse['matches'] = true;
-                finalResponse['version'] = version_;
-                if (version_ == lastVersion) finalResponse['isLast'] = true;
 
-                // TODO: access ethereum and get blockNumber
+                // access ethereum and get blockNumber
+                let retKey = dataJson_['retrievalKey'];
 
+                let Web3Wrapper = require('../utils/web3-wrapper');
+                let result_ = await Web3Wrapper.get(retKey);
+                let blockNo = result_[2].toNumber();
+
+                // from ipfs batch files check if ours exists
+                let ipfs_batch_address = web3.toAscii(result_[0] + result_[1]);
+                ipfs_batch_address = ipfs_batch_address.substr(0, 32) + ipfs_batch_address.substr(33, 14);
+
+                let ipfs_address_list = await readFromIpfs(ipfs_batch_address);
+                ipfs_address_list = JSON.parse(ipfs_address_list);
+
+                let isBlockNoRight = false;
+                for (var i = 0; i < ipfs_address_list.length; i++) {
+                    if (ipfs_address_list[i] == prevAddress) {
+                        finalResponse['matches'] = true;
+                        finalResponse['version'] = version_;
+                        if (version_ == lastVersion) finalResponse['isLast'] = true;
+                        finalResponse['blockNo'] = blockNo;
+                        isBlockNoRight = true;
+
+                        break;
+                    }
+                }
+
+                if (isBlockNoRight == false) {
+                    console.log("The blockNo connected to Ipfs batch doesn't match!");
+                }
+                
                 break;
             }
+
+            prevAddress = dataJson_['prev'];
         }
     }
 
