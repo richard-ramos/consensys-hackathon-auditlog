@@ -23,24 +23,15 @@ module.exports.createLog = function(req, res){
 
 
 module.exports.dataExists = function(req, res){
-
-	auditLogContract.setProvider(web3.currentProvider);
-
-
-
-
-
-
-
-
-
 	var response = {
 		request: {
 			eid: req.body.eid,
 			userId: req.body.userId
 		},
-		error: false,
-		matches: false
+		matchVersion: -1,
+		matches: false,
+		matchesWithLastVersion: false,
+		blockNo: -1
 	};
 
 	var x = auditLog.audit
@@ -48,17 +39,13 @@ module.exports.dataExists = function(req, res){
 		req.body.userId,	// user id
 		req.body.eid, 		// external id
 		req.body.jsonObject	// json object
-	);
+	)
+	.then( (result) => {
+		response.matches = result.matches;
+		response.blockNo = result.blockNo;
+		response.matchesWithLastVersion = result.isLast;
+		response.matchVersion = result.version;
 
-	x.then((result) => {
-		response.matches = result;
 		res.json(response);
-	}).catch((error) => {
-		console.log(error);
-		response.error = true;
-		res.json(response);
-	})
-
-
-	
+	});
 }

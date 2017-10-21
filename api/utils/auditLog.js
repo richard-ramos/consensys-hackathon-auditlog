@@ -1,130 +1,109 @@
 import web3 from '../utils/getWeb3'
 
-var ipfs = require('ipfs')
+var ipfsAPI = require('ipfs-api')
 var stringify = require('json-stable-stringify');
 var mBTree = require('merkle-btree');
 
 const ONE_MINUTE = 3 * 1000; //60 * 1000;
 
-var address_list = [];
+var g_address_list = [];
+var g_ipfs;
+var g_map = {};
+var g_retrievalKey = getHash(new Date());
+const IPFS_GATEWAY = '/ip4/127.0.0.1/tcp/5001';
 
 // Constructor
 function AuditLog() {
-    this.ipfs = new ipfs();
-    this.storage = new mBTree.IPFSStorage(this.ipfs);
-    this.tree = new mBTree.MerkleBTree(this.storage);
-    this.retrievalKey = this.getHash(new Date());
+    g_ipfs = new ipfsAPI(IPFS_GATEWAY);
+    g_map = {};
+    g_retrievalKey = getHash(new Date());
 
-    console.log("RetrievalKey: " + this.retrievalKey);
-
-    address_list = [];
-
-    this.batchJob = this.batchJob.bind(this);
-
-    setInterval(this.batchJob, ONE_MINUTE);
+    buildMap();
+    setInterval(batchJob, ONE_MINUTE);
 }
 
 // class methods
 AuditLog.prototype.log = function(userId, externalId, jsonObject) {
-    var prev_address_key = this.getHash(externalId, userId, 'ipfs_address');
-    var version = 0;
+    console.log("user id: " + userId);
+    console.log("external id: " + externalId);
+
+    var key = getHash(userId, externalId);
     var prev_ipfs_address = "none";
+    var data = stringify(jsonObject);
 
-    var prev = this.tree.get(prev_address_key)
-        .then( value => {
-            if (value != null) {
-                version = value.version;
-                prev_ipfs_address = value.ipfs_address;
-            }
+    let value = {
+        "key": key,
+        "prev": prev_ipfs_address,
+        "version": 0,
+        "retrievalKey": g_retrievalKey,
+        "data": data,
+        "dataHash": getHash(data)
+    }
 
-            let data = stringify(jsonObject);
-            let dataHash = this.getHash(data);
-            let retrievalKey = this.retrievalKey;
-            var value = {
-                "prev": prev_ipfs_address,
-                "version": version,
-                "retrievalKey": this.retrievalKey,
-                "data": data,
-                "dataHash": dataHash
-            };
+    if (g_map.hasOwnProperty(key)) { // exists => append
+        prev_ipfs_address = g_map[key];
+        value.prev = prev_ipfs_address;
 
-            let key = this.getHash(externalId, userId);
-            this.tree.put(key, value)
-                .then( ipfs_address => {
-                    address_list.push(ipfs_address);
-                    let prev_value = {
-                        'version': version + 1,
-                        'ipfs_address': ipfs_address
-                    };
-                    this.tree.put(prev_address_key, prev_value);
-
-                    console.log("added to ipfs!");
-                });
-        });
+        readFromIpfs(prev_ipfs_address)
+            .then( (result) => {
+                let jsonData_ = JSON.parse(result);
+                value.version = jsonData_['version'] + 1;
+                addToIpfs(value);
+            });
+    } else {
+        addToIpfs(value);
+    }
 
     return;
 };
 
-AuditLog.prototype.audit = function(userId, externalId, jsonObject) {
-    var key = this.getHash(externalId, userId);
+AuditLog.prototype.audit = async function(userId, externalId, jsonObject) {
+    var key = getHash(userId, externalId);
     var minimizedJson = stringify(jsonObject);
-    var jsonHash = this.getHash(minimizedJson);
+    var jsonHash = getHash(minimizedJson);
 
-    let logValue, outcomeObj;
+    let finalResponse = {
+        "matches": false,
+        "blockNo": -1,
+        "isLast": false,
+        "version": -1
+    };
 
-    return this.tree.get(key)
-        .then( value => {
-            logValue = value;
-            if (value == null) {
-                console.log("Log doesn't exist");
-                return { outcome: false };
+    let isHashMatch = false;
+    if (!g_map.hasOwnProperty(key)) {
+        console.log("Log doesn't exist");
+    } else {
+        console.log("Log exists");
+        let ipfs_address = g_map[key];
+        let currentData = await readFromIpfs(ipfs_address);
+        let currentDataJson = JSON.parse(currentData);
+        let lastVersion = currentDataJson['version'];
+        let prevAddress = ipfs_address; // last data
+
+        for (var i = lastVersion; i >= 0; i--) {
+            let data_ = await readFromIpfs(prevAddress);
+            let dataJson_ = JSON.parse(data_);
+            let version_ = dataJson_['version'];
+            prevAddress = dataJson_['prev'];
+
+            if (dataJson_['dataHash'] == jsonHash) {
+                console.log("Hash matches with version:" + version_ + " lastVersion=" + lastVersion);
+                isHashMatch = true;
+                finalResponse['matches'] = true;
+                finalResponse['version'] = version_;
+                if (version_ == lastVersion) finalResponse['isLast'] = true;
+
+                // TODO: access ethereum and get blockNumber
+
+                break;
             }
+        }
+    }
 
-            // Compare by hash of the data
-            if (jsonHash == value.dataHash) {
-                console.log("Hash matches");
-                return { outcome: true, log: value };
-
-            } else {
-                console.log("Hash doesn't match");
-                return { outcome: false };
-            }
-        })
-        .then( (outcome) => {
-            outcomeObj = outcome;
-            let Web3Wrapper = require('../utils/web3-wrapper');
-            if(outcomeObj.outcome)
-                return Web3Wrapper.get(outcome.log.retrievalKey)
-            else
-                return new Promise((resolve) => { resolve({}); });
-        })
-        .then((result) => {
-            let finalResponse = false; 
-            if(outcomeObj.outcome){
-                if(parseInt(result[1].toString(10)) > 0)
-                    finalResponse = true;
-                else 
-                    finalResponse = false;
-
-                console.log("Block: %s", result[1].toString(10));
-            } else
-                finalResponse = false;
-
-
-            if(finalResponse)
-                console.log('\x1b[32m');
-            else
-                console.log("\x1b[31m");
-
-            console.log("Outcome: %s", finalResponse);
-
-            console.log("\x1b[37m");
-
-            return finalResponse;
-        });
+    return finalResponse;
 };
 
-AuditLog.prototype.getHash = function() {
+function getHash() {
     var key = "";
     for (var i = 0; i < arguments.length; i++) {
         key = web3.sha3(key + arguments[i]);
@@ -133,33 +112,110 @@ AuditLog.prototype.getHash = function() {
     return key;
 }
 
-AuditLog.prototype.batchJob = function() {
+function batchJob() {
     console.log("Batch job started");
 
-    if (address_list.length <= 0) {
+    if (g_address_list.length <= 0) {
         console.log("Address list is empty. Skipping blockchain call")
     } else {
-        this.ipfs.dag.put(
-            this.address_list,
-            { format: 'dag-cbor', hashAlg: 'sha2-256' },
-            (err, cid) =>
-            {
-                address_list = []; // reset
-                let ipfs_address = cid.toBaseEncodedString();
-                console.log(ipfs_address);
+        // Adds address_list to ipfs
+        g_ipfs.files.add(new Buffer(stringify(g_address_list), `utf8`))
+            .then(res => {
+                let ipfs_address = res[0].hash;
 
+                console.log("added pages to ipfs! ipfs/" + ipfs_address + " retKey:" + g_retrievalKey);
+
+                // add to blockchain
                 let Web3Wrapper = require('../utils/web3-wrapper');
 
-                Web3Wrapper.insert(this.retrievalKey, ipfs_address)
+                Web3Wrapper.insert(g_retrievalKey, ipfs_address)
                     .then((result) => {
                         const logEvent = result.logs[0];
-                        console.log( "IPFS address: %s%s, Block: %s", web3.toAscii(logEvent.args.ipfsAddress1), web3.toAscii(logEvent.args.ipfsAddress2), logEvent.args.blockNumber);
+                        console.log( "IPFS address: %s, Block: %s", web3.toAscii(logEvent.args.ipfsAddress1 + logEvent.args.ipfsAddress2), logEvent.args.blockNumber);
                     });
 
-                this.retrievalKey = this.getHash(new Date());
+                // reset pages and retKey
+                g_retrievalKey = getHash(new Date());
+                g_address_list = [];
             });
     }
 
+    return;
+}
+
+function addToIpfs(value) {
+    g_ipfs.files.add(new Buffer(stringify(value), `utf8`))
+        .then(res => {
+            let ipfs_address = res[0].hash;
+            g_address_list.push(ipfs_address);
+            g_map[value.key] = ipfs_address;
+            console.log("added to ipfs! ipfs/" + ipfs_address + " version:" + value.version);
+        });
+}
+
+function readFromIpfs(ipfs_address) {
+    return g_ipfs.files.cat(ipfs_address)
+      .then(stream => {
+        return new Promise((resolve, reject) => {
+          let res = ``;
+
+          stream.on(`data`, function (chunk) {
+            res += chunk.toString();
+          });
+
+          stream.on(`error`, function (err) {
+            reject(err);
+          });
+
+          stream.on(`end`, function () {
+            resolve(res);
+          });
+        });
+      });
+}
+
+async function buildMap() {
+    console.log("HashMap building starts...");
+
+    let processedFilesCount = 0;
+    let Web3Wrapper = require('../utils/web3-wrapper');
+    let ipfs_batch_addresses = await Web3Wrapper.getArr();
+    //console.log(ipfs_batch_addresses);
+
+    // clear addressess
+    for (var i = 0; i < ipfs_batch_addresses.length; i++) {
+        ipfs_batch_addresses[i] = ipfs_batch_addresses[i].substr(0, 46);
+    }
+
+    for (var i = 0; i < ipfs_batch_addresses.length; i++) {
+        let result = await readFromIpfs(ipfs_batch_addresses[i]);
+        let ipfs_addresses = JSON.parse(result);
+
+        for (var j = 0; j < ipfs_addresses.length; j++) {
+            processedFilesCount++;
+            let data = await readFromIpfs(ipfs_addresses[j]);
+            let jsonData = JSON.parse(data);
+
+            let key = jsonData['key'];
+            let ipfs_address = ipfs_addresses[j];
+            let version = jsonData['version'];
+
+            if (!g_map.hasOwnProperty(key)) {
+                g_map[key] = ipfs_address;
+            } else {
+                let otherData = await readFromIpfs(g_map[key]);
+                let otherJsonData = JSON.parse(otherData);
+
+                if (otherJsonData['version'] < version) {
+                    g_map[key] = ipfs_address;    // change only when new version
+                }
+            }
+        }
+    }
+
+    console.log("HashMap building processed " + processedFilesCount + " files");
+    console.log("HashMap size: " + Object.keys(g_map).length);
+    console.log("HashMap built successfully");
     return;
 }
 
