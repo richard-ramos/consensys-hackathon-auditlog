@@ -10,12 +10,11 @@ class AuditLogClientException(Exception):
 class AuditLogClient(object):
 
 
-        def __init__(self, url, key='', secret='', maxCacheSize=100000):
+        def __init__(self, url, key='', secret=''):
             self.url = url
             self.key = key
             self.secret = secret
             self.api = ApiClient(self.key, self.secret, self.url)
-            self.cache = LRUCache(maxsize=maxCacheSize)
 
 
         def check(self,req):
@@ -32,8 +31,6 @@ class AuditLogClient(object):
         def log(self, userid, eid, jsonObject):
             req = self.api.post('/api/log', {'userid' : userid, 'eid' : eid, 'jsonObject' : json.dumps(jsonObject) } )
             self.check(req)
-            # invalidate cache
-            del self.objCache[ self.uniqueId(userid,eid) ]  
 
 
         def audit(self, userid, eid, jsonObject):
