@@ -4,7 +4,7 @@ var ipfsAPI = require('ipfs-api')
 var stringify = require('json-stable-stringify');
 var mBTree = require('merkle-btree');
 
-const ONE_MINUTE = 3 * 1000; //60 * 1000;
+const ONE_MINUTE = 60 * 1000;
 
 var g_address_list = [];
 var g_ipfs;
@@ -24,8 +24,6 @@ function AuditLog() {
 
 // class methods
 AuditLog.prototype.log = function(userId, externalId, jsonObject) {
-    console.log("user id: " + userId);
-    console.log("external id: " + externalId);
 
     var key = getHash(userId, externalId);
     var prev_ipfs_address = "none";
@@ -119,7 +117,7 @@ AuditLog.prototype.audit = async function(userId, externalId, jsonObject) {
                 if (isBlockNoRight == false) {
                     console.log("The blockNo connected to Ipfs batch doesn't match!");
                 }
-                
+
                 break;
             }
 
@@ -158,7 +156,7 @@ function batchJob() {
                 Web3Wrapper.insert(g_retrievalKey, ipfs_address)
                     .then((result) => {
                         const logEvent = result.logs[0];
-                        console.log( "IPFS address: %s, Block: %s", web3.toAscii(logEvent.args.ipfsAddress1 + logEvent.args.ipfsAddress2), logEvent.args.blockNumber);
+                        console.log( "Added to blockchain => IPFS address: %s, Block: %s", web3.toAscii(logEvent.args.ipfsAddress1 + logEvent.args.ipfsAddress2), logEvent.args.blockNumber);
                     });
 
                 // reset pages and retKey
