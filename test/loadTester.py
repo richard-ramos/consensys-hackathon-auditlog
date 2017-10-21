@@ -109,7 +109,7 @@ for i in range(total/requestsPerSecond):
         eid = random.randint(0,objects-1)
 
         data = {
-                "uid": str(uid),
+                "userId": str(uid),
                 "eid": str(eid),
                 "jsonObject": obj
             }
@@ -135,7 +135,7 @@ for uid,eid,obj in log:
     print 'adding task %d...' % count
 
     data = {
-            "uid": str(uid),
+            "userId": str(uid),
             "eid": str(eid),
             "jsonObject": obj
         }
