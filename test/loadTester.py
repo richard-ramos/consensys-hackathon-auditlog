@@ -85,6 +85,7 @@ baseurl = 'http://localhost:3000'
 parser = argparse.ArgumentParser(description = 'Process display arguments')
 parser.add_argument('--rps', nargs = '?', default = '2')
 parser.add_argument('--secs', nargs = '?', default = '3')
+parser.add_argument('--cmd', nargs = '?', default = 'log')
 args = parser.parse_args()
 
 
@@ -93,6 +94,7 @@ objects = 50
 requestsPerSecond = int(args.rps)
 secs = int(args.secs)
 total = secs * requestsPerSecond
+cmd = args.cmd
 
 log = []
 logf  = open('demolog.txt','w')
@@ -114,7 +116,7 @@ for i in range(total/requestsPerSecond):
                 "jsonObject": obj
             }
 
-        url = baseurl + '/api/log'
+        url = baseurl + '/api/' + cmd
         print 'requesting POST ' + url + ' ' + str(data)
 
         parallel.add_task(i, requests.post, url, data = data )
@@ -125,32 +127,3 @@ for i in range(total/requestsPerSecond):
 
     # wait for all jobs to return data
     print parallel.get_results()
-
-print 'LOG LENGTH = ',len(log)
-
-# launch jobs
-count = 0
-for uid,eid,obj in log:
-
-    print 'adding task %d...' % count
-
-    data = {
-            "userId": str(uid),
-            "eid": str(eid),
-            "jsonObject": obj
-        }
-
-    url = baseurl + '/api/audit'
-    print 'requesting POST ' + url + ' ' + str(data)
-
-    parallel.add_task(i, requests.post, url, data = data )
-
-    time.sleep( 1.0 / requestsPerSecond )
-
-    count += 1
-    if count == requestsPerSecond: 
-	    # wait for all jobs to return data
-   		print parallel.get_results()
-   		count = 0
-
-
