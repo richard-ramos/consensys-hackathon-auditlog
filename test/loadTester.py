@@ -83,8 +83,8 @@ baseurl = 'http://localhost:3000'
 
 
 parser = argparse.ArgumentParser(description = 'Process display arguments')
-parser.add_argument('--rps', nargs = '?', default = '3')
-parser.add_argument('--secs', nargs = '?', default = '5')
+parser.add_argument('--rps', nargs = '?', default = '2')
+parser.add_argument('--secs', nargs = '?', default = '3')
 args = parser.parse_args()
 
 
@@ -100,9 +100,9 @@ logf  = open('demolog.txt','w')
 # launch jobs
 for i in range(total/requestsPerSecond):
 
-    for i in range(requestsPerSecond):
+    for j in range(requestsPerSecond):
 
-        print 'adding task %d...' % i
+        print 'adding task %d...' % j
 
         obj = { "price" : str(200.0 + random.random()*100) }
         uid = random.randint(0,users-1)
@@ -117,7 +117,7 @@ for i in range(total/requestsPerSecond):
         url = baseurl + '/api/log'
         print 'requesting POST ' + url + ' ' + str(data)
 
-        parallel.add_task(i, requests.post, url, data = json.dumps(obj) )
+        parallel.add_task(i, requests.post, url, data = data )
 
         log.append( (uid,eid,obj) )
         logf.write('%s,%s,%s\n' % (str(uid),str(eid),json.dumps(obj)))
@@ -126,11 +126,13 @@ for i in range(total/requestsPerSecond):
     # wait for all jobs to return data
     print parallel.get_results()
 
+print 'LOG LENGTH = ',len(log)
+
 # launch jobs
 count = 0
 for uid,eid,obj in log:
 
-    print 'adding task %d...' % i
+    print 'adding task %d...' % count
 
     data = {
             "uid": str(uid),
@@ -141,16 +143,14 @@ for uid,eid,obj in log:
     url = baseurl + '/api/audit'
     print 'requesting POST ' + url + ' ' + str(data)
 
-    parallel.add_task(i, requests.post, url, data = json.dumps(obj) )
+    parallel.add_task(i, requests.post, url, data = data )
 
-    log.append( (uid,eid,obj) )
-    logf.write('%s,%s,%s\n' % (str(uid),str(eid),json.dumps(obj)))
-    
     time.sleep( 1.0 / requestsPerSecond )
 
     count += 1
-    if count % requestsPerSecond == 0: 
+    if count == requestsPerSecond: 
 	    # wait for all jobs to return data
    		print parallel.get_results()
+   		count = 0
 
 
