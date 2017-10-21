@@ -2,28 +2,6 @@
   "contract_name": "AuditLog",
   "abi": [
     {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "retrievialKey",
-          "type": "bytes32"
-        }
-      ],
-      "name": "getIpfsAddress",
-      "outputs": [
-        {
-          "name": "ipfsAddress",
-          "type": "bytes32"
-        },
-        {
-          "name": "blockNumber",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -32,28 +10,6 @@
         }
       ],
       "name": "setOwner",
-      "outputs": [
-        {
-          "name": "success",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "retrievialKey",
-          "type": "bytes32"
-        },
-        {
-          "name": "ipfsAddress",
-          "type": "bytes32"
-        }
-      ],
-      "name": "addFile",
       "outputs": [
         {
           "name": "success",
@@ -87,7 +43,85 @@
       "name": "ipfsFiles",
       "outputs": [
         {
-          "name": "ipfsAddress",
+          "name": "ipfsAddress1",
+          "type": "bytes32"
+        },
+        {
+          "name": "ipfsAddress2",
+          "type": "bytes32"
+        },
+        {
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "getIpfsAddresses",
+      "outputs": [
+        {
+          "name": "ipfsAddress1",
+          "type": "bytes32"
+        },
+        {
+          "name": "ipfsAddress2",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "retrievialKey",
+          "type": "bytes32"
+        },
+        {
+          "name": "ipfsAddress1",
+          "type": "bytes32"
+        },
+        {
+          "name": "ipfsAddress2",
+          "type": "bytes32"
+        }
+      ],
+      "name": "addFile",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "retrievialKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getIpfsInfo",
+      "outputs": [
+        {
+          "name": "ipfsAddress1",
+          "type": "bytes32"
+        },
+        {
+          "name": "ipfsAddress2",
           "type": "bytes32"
         },
         {
@@ -111,6 +145,19 @@
         {
           "name": "hashed",
           "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "countAddresses",
+      "outputs": [
+        {
+          "name": "count",
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -141,11 +188,16 @@
         },
         {
           "indexed": false,
-          "name": "ipfsAddress",
+          "name": "ipfsAddress1",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "name": "ipfsAddress2",
           "type": "bytes32"
         }
       ],
-      "name": "LogIpfsFile",
+      "name": "LogIPFSfile",
       "type": "event"
     },
     {
@@ -166,7 +218,7 @@
       "type": "event"
     }
   ],
-  "unlinked_binary": "0x6060604052341561000f57600080fd5b5b5b60008054600160a060020a03191633600160a060020a03161790555b5b5b6103d58061003e6000396000f3006060604052361561005c5763ffffffff60e060020a60003504166306b3bcd1811461006157806313af40351461008f5780634f256693146100c2578063893d20e8146100ef578063b72dd5661461011e578063d9d84dd41461014c575b600080fd5b341561006c57600080fd5b610077600435610174565b60405191825260208201526040908101905180910390f35b341561009a57600080fd5b6100ae600160a060020a03600435166101c3565b604051901515815260200160405180910390f35b34156100cd57600080fd5b6100ae60043560243561027e565b604051901515815260200160405180910390f35b34156100fa57600080fd5b610102610364565b604051600160a060020a03909116815260200160405180910390f35b341561012957600080fd5b610077600435610374565b60405191825260208201526040908101905180910390f35b341561015757600080fd5b61016260043561038d565b60405190815260200160405180910390f35b600080600160006101848561038d565b81526020810191909152604001600090812054906001906101a48661038d565b815260208101919091526040016000206001015490925090505b915091565b60008054819033600160a060020a039081169116146101e157600080fd5b600160a060020a03831615156101f657600080fd5b50600054600160a060020a0390811690831681146102725782600160a060020a031681600160a060020a03167fa1d2149652d81eb35c360c115fc7ac594124cb1ea8a5a33e9a7f5768c62869fb60405160405180910390a360008054600160a060020a031916600160a060020a03851617905560019150610277565b600091505b5b50919050565b60008054819033600160a060020a0390811691161461029c57600080fd5b6102a58461038d565b6000818152600160205260409020549091508314156102c357600080fd5b60008181526001602081905260409091200154156102e057600080fd5b6000818152600160208190526040918290208581554391018190557f664a807b8dd15d8c266c5770b22f0aa4a85323159373779963c6fc25b6d40a97913391908790879051600160a060020a039094168452602084019290925260408084019190915260608301919091526080909101905180910390a1600191505b5b5092915050565b600054600160a060020a03165b90565b6001602081905260009182526040909120805491015482565b600081604051908152602001604051809103902090505b9190505600a165627a7a723058200432a6a1fcd668f552d42b3c61fc9619076988c2d06450f8eda4c0854435bb520029",
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b5b5b60008054600160a060020a03191633600160a060020a03161790555b5b5b6105ab8061003e6000396000f300606060405236156100725763ffffffff60e060020a60003504166313af40358114610077578063893d20e8146100aa578063b72dd566146100d9578063c4d754df14610113578063c7fdfeb114610141578063d5c354e514610171578063d9d84dd4146101ab578063ec530de6146101d3575b600080fd5b341561008257600080fd5b610096600160a060020a03600435166101f8565b604051901515815260200160405180910390f35b34156100b557600080fd5b6100bd6102b3565b604051600160a060020a03909116815260200160405180910390f35b34156100e457600080fd5b6100ef6004356102c3565b60405192835260208301919091526040808301919091526060909101905180910390f35b341561011e57600080fd5b6101296004356102e4565b60405191825260208201526040908101905180910390f35b341561014c57600080fd5b61009660043560243560443561032e565b604051901515815260200160405180910390f35b341561017c57600080fd5b6100ef600435610485565b60405192835260208301919091526040808301919091526060909101905180910390f35b34156101b657600080fd5b6101c16004356104fd565b60405190815260200160405180910390f35b34156101de57600080fd5b6101c1610519565b60405190815260200160405180910390f35b60008054819033600160a060020a0390811691161461021657600080fd5b600160a060020a038316151561022b57600080fd5b50600054600160a060020a0390811690831681146102a75782600160a060020a031681600160a060020a03167fa1d2149652d81eb35c360c115fc7ac594124cb1ea8a5a33e9a7f5768c62869fb60405160405180910390a360008054600160a060020a031916600160a060020a038516179055600191506102ac565b600091505b5b50919050565b600054600160a060020a03165b90565b60036020526000908152604090208054600182015460029092015490919083565b6000806001838154811015156102f657fe5b906000526020600020900160005b5054600280548590811061031457fe5b906000526020600020900160005b5054915091505b915091565b60008054819033600160a060020a0390811691161461034c57600080fd5b610355856104fd565b60008181526003602052604090205490915084141561037357600080fd5b60008181526003602052604090206001015483141561039157600080fd5b600081815260036020526040902060020154156103ad57600080fd5b600081815260036020526040902084815560018082018590554360029092019190915580548082016103df8382610534565b916000526020600020900160005b508590555060028054600181016104048382610534565b916000526020600020900160005b50849055507f95a5ae5791b996b7ec457f1b4c3ffcd84feadcdf2495e9833e050ffb3bdedf5d3343878787604051600160a060020a03909516855260208501939093526040808501929092526060840152608083019190915260a0909101905180910390a1600191505b5b509392505050565b600080600060036000610497866104fd565b81526020810191909152604001600090812054906003906104b7876104fd565b81526020810191909152604001600090812060010154906003906104da886104fd565b8152602081019190915260400160002060020154919450925090505b9193909250565b600081604051908152602001604051809103902090505b919050565b6002546001546000911461052c57600080fd5b506001545b90565b8154818355818115116105585760008381526020902061055891810190830161055e565b5b505050565b6102c091905b808211156105785760008155600101610564565b5090565b905600a165627a7a72305820431e030b06344f3cc5dd5590e02f370a48844262619fed727ad459400f8f08030029",
   "networks": {
     "1508478662630": {
       "events": {
@@ -437,8 +489,152 @@
       "links": {},
       "address": "0x0c5b3a977f556a28a6d357811784edf2b982bcc2",
       "updated_at": 1508503681254
+    },
+    "1508569329856": {
+      "events": {
+        "0x669f1785e374ab1c2912c31466365ca633c17057adaa08d83e1e512098c28b6f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "retrievialKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress1",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress2",
+              "type": "bytes16"
+            }
+          ],
+          "name": "LogIPFSfile",
+          "type": "event"
+        },
+        "0xa1d2149652d81eb35c360c115fc7ac594124cb1ea8a5a33e9a7f5768c62869fb": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerSet",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xb902b1dc68c74bb4b5c5d9d0b62b040db9930aa3",
+      "updated_at": 1508569343093
+    },
+    "1508571477750": {
+      "events": {
+        "0x669f1785e374ab1c2912c31466365ca633c17057adaa08d83e1e512098c28b6f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "retrievialKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress1",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress2",
+              "type": "bytes16"
+            }
+          ],
+          "name": "LogIPFSfile",
+          "type": "event"
+        },
+        "0xa1d2149652d81eb35c360c115fc7ac594124cb1ea8a5a33e9a7f5768c62869fb": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerSet",
+          "type": "event"
+        },
+        "0x95a5ae5791b996b7ec457f1b4c3ffcd84feadcdf2495e9833e050ffb3bdedf5d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "retrievialKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress1",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress2",
+              "type": "bytes32"
+            }
+          ],
+          "name": "LogIPFSfile",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x4cb5658ce3faaf98e118a307568e12ab0311e794",
+      "updated_at": 1508572889756
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1508503681254
+  "updated_at": 1508572889756
 }

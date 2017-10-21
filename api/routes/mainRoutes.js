@@ -3,6 +3,7 @@
 module.exports = function(app){
 	var auditLog = require('../controllers/auditLogController');
 
+	
 	app.route('/api/log')
 		.post(auditLog.createLog);
 

@@ -6,14 +6,14 @@ contract AuditLog is Owned{
 
     struct ipfsInfo {
         bytes32 ipfsAddress1;
-        bytes16 ipfsAddress2;
+        bytes32 ipfsAddress2;
         uint blockNumber;
     }
 
-    event LogIPFSfile(address owner, uint blockNumber, bytes32 retrievialKey, bytes32 ipfsAddress1, bytes16 ipfsAddress2);
+    event LogIPFSfile(address owner, uint blockNumber, bytes32 retrievialKey, bytes32 ipfsAddress1, bytes32 ipfsAddress2);
 
     bytes32[] ipfsAddresses1;
-    bytes16[] ipfsAddresses2;
+    bytes32[] ipfsAddresses2;
 
     mapping(bytes32 => ipfsInfo) public ipfsFiles;
 
@@ -42,7 +42,7 @@ contract AuditLog is Owned{
     function getIpfsInfo(bytes32 retrievialKey)
         public
         constant
-        returns(bytes32 ipfsAddress1, bytes16 ipfsAddress2, uint blockNumber)
+        returns(bytes32 ipfsAddress1, bytes32 ipfsAddress2, uint blockNumber)
     {
         return (ipfsFiles[hashKey(retrievialKey)].ipfsAddress1, ipfsFiles[hashKey(retrievialKey)].ipfsAddress2, ipfsFiles[hashKey(retrievialKey)].blockNumber);
     }
@@ -50,12 +50,12 @@ contract AuditLog is Owned{
     function getIpfsAddresses(uint id)
         public
         constant
-        returns(bytes32 ipfsAddress1, bytes16 ipfsAddress2)
+        returns(bytes32 ipfsAddress1, bytes32 ipfsAddress2)
     {
         return (ipfsAddresses1[id], ipfsAddresses2[id]);
     }
 
-    function addFile(bytes32 retrievialKey, bytes32 ipfsAddress1, bytes16 ipfsAddress2)
+    function addFile(bytes32 retrievialKey, bytes32 ipfsAddress1, bytes32 ipfsAddress2)
         public
         fromOwner
         returns(bool success)
@@ -69,12 +69,13 @@ contract AuditLog is Owned{
         ipfsFiles[hash].ipfsAddress1 = ipfsAddress1;
         ipfsFiles[hash].ipfsAddress2 = ipfsAddress2;
         ipfsFiles[hash].blockNumber = block.number;
-        
+      
         ipfsAddresses1.push(ipfsAddress1);
         ipfsAddresses2.push(ipfsAddress2);
         
         LogIPFSfile(msg.sender, block.number, retrievialKey, ipfsAddress1, ipfsAddress2);
         
+
         return true;
     }
     

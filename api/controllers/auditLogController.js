@@ -26,6 +26,14 @@ module.exports.dataExists = function(req, res){
 
 	auditLogContract.setProvider(web3.currentProvider);
 
+
+
+
+
+
+
+
+
 	var response = {
 		request: {
 			eid: req.body.eid,

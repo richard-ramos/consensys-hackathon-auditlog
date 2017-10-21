@@ -153,7 +153,8 @@ AuditLog.prototype.batchJob = function() {
                 Web3Wrapper.insert(this.retrievalKey, ipfs_address)
                     .then((result) => {
                         const logEvent = result.logs[0];
-                        console.log( "IPFS address: %s, Block: %s", logEvent.args.ipfsAddress, logEvent.args.blockNumber);
+                        console.log("AAAA: " + logEvent.args.ipfsAddress2);
+                        console.log( "IPFS address: %s%s, Block: %s", web3.toAscii(logEvent.args.ipfsAddress1), web3.toAscii(logEvent.args.ipfsAddress2), logEvent.args.blockNumber);
                     });
 
                 this.retrievalKey = this.getHash(new Date());
