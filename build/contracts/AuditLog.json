@@ -633,8 +633,64 @@
       "links": {},
       "address": "0x4cb5658ce3faaf98e118a307568e12ab0311e794",
       "updated_at": 1508572889756
+    },
+    "1508586805455": {
+      "events": {
+        "0x95a5ae5791b996b7ec457f1b4c3ffcd84feadcdf2495e9833e050ffb3bdedf5d": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "retrievialKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress1",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "name": "ipfsAddress2",
+              "type": "bytes32"
+            }
+          ],
+          "name": "LogIPFSfile",
+          "type": "event"
+        },
+        "0xa1d2149652d81eb35c360c115fc7ac594124cb1ea8a5a33e9a7f5768c62869fb": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "LogOwnerSet",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x3908ac0d07d065e46c80a157940c020a2b5e564c",
+      "updated_at": 1508586812795
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1508572889756
+  "updated_at": 1508586812795
 }

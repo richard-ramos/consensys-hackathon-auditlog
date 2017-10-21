@@ -63,7 +63,7 @@ definitions:
     type: "object"
     required:
     - "eid"
-    - "userid"
+    - "userId"
     - "jsonObject"
     properties:
       eid:
