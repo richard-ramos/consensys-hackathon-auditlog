@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from RestfulClient.api import ApiClient
-from cachetools import LRUCache
 
 import json
 
