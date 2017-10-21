@@ -79,7 +79,6 @@ parallel = Parallel(4)
 
 #url = 'http://c1.staticflickr.com/4/3939/15717056471_e25211f4d1_b.jpg'
 baseurl = 'http://localhost:3000'
-url = 'http://localhost:3000/api/log'
 
 
 
@@ -118,7 +117,7 @@ for i in range(total/requestsPerSecond):
         url = baseurl + '/api/log'
         print 'requesting POST ' + url + ' ' + str(data)
 
-        parallel.add_task(i, requests.post, url, data = {'key':'value'})
+        parallel.add_task(i, requests.post, url, data = json.dumps(obj) )
 
         log.append( (uid,eid,obj) )
         logf.write('%s,%s,%s\n' % (str(uid),str(eid),json.dumps(obj)))
@@ -142,7 +141,7 @@ for uid,eid,obj in log:
     url = baseurl + '/api/audit'
     print 'requesting POST ' + url + ' ' + str(data)
 
-    parallel.add_task(i, requests.post, url, data = {'key':'value'})
+    parallel.add_task(i, requests.post, url, data = json.dumps(obj) )
 
     log.append( (uid,eid,obj) )
     logf.write('%s,%s,%s\n' % (str(uid),str(eid),json.dumps(obj)))
